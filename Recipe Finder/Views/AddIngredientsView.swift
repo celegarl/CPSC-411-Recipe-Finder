@@ -4,6 +4,8 @@ struct AddIngredientsView: View {
     @StateObject private var viewModel = AddIngredientsViewModel()
     @State private var newIngredient: String = ""
 
+    @Binding var selectedTab: Int
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -41,4 +43,8 @@ struct AddIngredientsView: View {
             .navigationTitle("Recipe Finder")
         }
     }
+}
+
+#Preview {
+    AddIngredientsView(selectedTab: .constant(0))
 }

@@ -15,3 +15,7 @@ struct RecipeListView: View {
         }
     }
 }
+
+#Preview {
+    RecipeListView(ingredients: "")
+}
