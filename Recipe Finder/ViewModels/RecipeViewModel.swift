@@ -54,16 +54,27 @@ class RecipeViewModel: ObservableObject {
                 count: recipeCount
             )
             
-            // MARK: Generate images for each recipe
-            for i in 0..<generatedRecipes.count {
-                do {
-                    let imageURL = try await openAIService.generateImage(for: generatedRecipes[i].title)
-                    let imageData = try await openAIService.downloadImage(from: imageURL)
-                    generatedRecipes[i].imageURL = imageURL
-                    generatedRecipes[i].imageData = imageData
-                } catch {
-                    // If image generation fails, continue without image
-                    print("Failed to generate image for \(generatedRecipes[i].title): \(error)")
+            // Generate images for all recipes in parallel
+            await withTaskGroup(of: (Int, String?, Data?).self) { group in
+                for i in 0..<generatedRecipes.count {
+                    group.addTask {
+                        do {
+                            let imageURL = try await self.openAIService.generateImage(for: generatedRecipes[i].title)
+                            let imageData = try await self.openAIService.downloadImage(from: imageURL)
+                            return (i, imageURL, imageData)
+                        } catch {
+                            print("Failed to generate image for \(generatedRecipes[i].title): \(error)")
+                            return (i, nil, nil)
+                        }
+                    }
+                }
+
+                // Collect results as they complete
+                for await (index, imageURL, imageData) in group {
+                    if let url = imageURL, let data = imageData {
+                        generatedRecipes[index].imageURL = url
+                        generatedRecipes[index].imageData = data
+                    }
                 }
             }
             
