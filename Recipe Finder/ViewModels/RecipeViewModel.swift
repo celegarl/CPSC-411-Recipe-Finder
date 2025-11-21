@@ -49,12 +49,23 @@ class RecipeViewModel: ObservableObject {
         
         do {
             // Generate recipes
-            let generatedRecipes = try await openAIService.generateRecipes(
+            var generatedRecipes = try await openAIService.generateRecipes(
                 ingredients: validIngredients,
                 count: recipeCount
             )
             
-            // TODO: - generate images for recipe names
+            // MARK: Generate images for each recipe
+            for i in 0..<generatedRecipes.count {
+                do {
+                    let imageURL = try await openAIService.generateImage(for: generatedRecipes[i].title)
+                    let imageData = try await openAIService.downloadImage(from: imageURL)
+                    generatedRecipes[i].imageURL = imageURL
+                    generatedRecipes[i].imageData = imageData
+                } catch {
+                    // If image generation fails, continue without image
+                    print("Failed to generate image for \(generatedRecipes[i].title): \(error)")
+                }
+            }
             
             recipes = generatedRecipes
             isLoading = false

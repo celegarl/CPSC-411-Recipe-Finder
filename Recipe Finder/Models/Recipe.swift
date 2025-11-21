@@ -47,4 +47,9 @@ struct ChatCompletionResponse: Codable {
 
 struct ImageGenerationResponse: Codable {
     // Models the DALL-E-3 API response
+    let data: [ImageData]
+
+    struct ImageData: Codable {
+        let url: String
+    }
 }

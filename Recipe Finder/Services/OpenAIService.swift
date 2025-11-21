@@ -75,4 +75,41 @@ class OpenAIService {
                 )
             }
         }
+    
+    func generateImage(for recipeName: String) async throws -> String {
+            let prompt = "A delicious, appetizing photo of \(recipeName), professional food photography"
+
+            let url = URL(string: "https://api.openai.com/v1/images/generations")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let body: [String: Any] = [
+                "model": "dall-e-3",
+                "prompt": prompt,
+                "size": "1024x1024",
+                "n": 1
+            ]
+
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+            let (data, _) = try await URLSession.shared.data(for: request)
+            let response = try JSONDecoder().decode(ImageGenerationResponse.self, from: data)
+
+            guard let imageURL = response.data.first?.url else {
+                throw NSError(domain: "OpenAIService", code: 2, userInfo: [NSLocalizedDescriptionKey: "No image URL in response"])
+            }
+
+            return imageURL
+        }
+
+        func downloadImage(from urlString: String) async throws -> Data {
+            guard let url = URL(string: urlString) else {
+                throw NSError(domain: "OpenAIService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+            }
+
+            let (data, _) = try await URLSession.shared.data(from: url)
+            return data
+        }
 }
