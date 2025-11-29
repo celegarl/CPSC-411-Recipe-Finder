@@ -21,12 +21,13 @@ class RecipeViewModel: ObservableObject {
 
     private let openAIService = OpenAIService.shared
 
-    func addIngredient() {
-        // Add ingredient
+    func addIngredient(_ ingredient: String) {
+        guard !ingredient.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        ingredients.append(ingredient)
     }
 
-    func removeIngredient(at index: Int) {
-        // Remove ingredient
+    func removeIngredient(at offsets: IndexSet) {
+        ingredients.remove(atOffsets: offsets)
     }
 
     func canGenerateRecipes() -> Bool {

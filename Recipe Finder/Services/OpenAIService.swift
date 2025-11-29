@@ -163,13 +163,50 @@ class OpenAIService {
                 userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
         }
 
-        let (data, _) = try await URLSession.shared.data(from: url)
+        var data: Data
+        do {
+            (data, _) = try await URLSession.shared.data(from: url)
+            if data.count < 2048 {
+                throw NSError(
+                    domain: "OpenAIService", code: 4,
+                    userInfo: [
+                        NSLocalizedDescriptionKey:
+                            "Image data is too small, assuming expired image."
+                    ])
+            }
+        } catch {
+            print("Failed to fetch image, loading from mock. Error: \(error)")
+            let mocks: [String: String] = [
+                "https://oaidalleapiprodscus.blob.core.windows.net/private/org-6MIzic4M3mgTHOsdFuYM0KTr/user-V0MQe4DkGj1AHkbsQOVfdoik/img-5THJRgvoTd56TW2JViEmuIsb.png?st=2025-11-29T20%3A23%3A02Z&se=2025-11-29T22%3A23%3A02Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=b2c0e1c0-cf97-4e19-8986-8073905d5723&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-11-29T21%3A23%3A02Z&ske=2025-11-30T21%3A23%3A02Z&sks=b&skv=2024-08-04&sig=Leba/BHrmYC15jFd91z1dQ9obqHw644Q1%2BKVFFYandU%3D":
+                    "Orange Chicken And Rice Soup.jpg",
+                "https://oaidalleapiprodscus.blob.core.windows.net/private/org-6MIzic4M3mgTHOsdFuYM0KTr/user-V0MQe4DkGj1AHkbsQOVfdoik/img-vxz7F7pdsQMqk2eSpQufzXAr.png?st=2025-11-29T20%3A22%3A59Z&se=2025-11-29T22%3A22%3A59Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=32836cae-d25f-4fe9-827b-1c8c59c442cc&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-11-29T20%3A03%3A07Z&ske=2025-11-30T20%3A03%3A07Z&sks=b&skv=2024-08-04&sig=LID4xCifbbn0B8TsZ/XM913P/lI4up4kYsf0E2vN91c%3D":
+                    "Orange Chicken Stir Fry.jpg",
+                "https://oaidalleapiprodscus.blob.core.windows.net/private/org-6MIzic4M3mgTHOsdFuYM0KTr/user-V0MQe4DkGj1AHkbsQOVfdoik/img-R50FiEUOdknhPlrB4XN0BQAA.png?st=2025-11-29T20%3A23%3A00Z&se=2025-11-29T22%3A23%3A00Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=31d50bd4-689f-439b-a875-f22bd677744d&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-11-29T15%3A04%3A50Z&ske=2025-11-30T15%3A04%3A50Z&sks=b&skv=2024-08-04&sig=8wijVVzpni8WXBpjoI8A6%2BdgtZzdaxA4OHXJBQ0uf1A%3D":
+                    "Orange Glazed Chicken.jpg",
+            ]
+            data = loadImageFromMock(fileName: mocks[urlString]!)
+        }
+        print(data)
         return data
     }
 
     private func loadFromMock(fileName: String) -> Data {
         let resourceName = "\(fileName)".replacingOccurrences(of: ".json", with: "")
         guard let file = Bundle.main.url(forResource: resourceName, withExtension: "json")
+        else {
+            fatalError("Couldn't find \(fileName) in main bundle.")
+        }
+
+        do {
+            return try Data(contentsOf: file)
+        } catch {
+            fatalError("Couldn't load \(fileName) from main bundle:\n\(error)")
+        }
+    }
+
+    private func loadImageFromMock(fileName: String) -> Data {
+        let resourceName = "\(fileName)".replacingOccurrences(of: ".jpg", with: "")
+        guard let file = Bundle.main.url(forResource: resourceName, withExtension: "jpg")
         else {
             fatalError("Couldn't find \(fileName) in main bundle.")
         }
