@@ -10,11 +10,11 @@ import Foundation
 class OpenAIService {
     static let shared = OpenAIService()
     private let apiKey = Config.openAIAPIKey
-    
+
     private init() {}
-    
+
     func generateRecipes(ingredients: [String], count: Int = 3) async throws -> [Recipe] {
-            let prompt = """
+        let prompt = """
             Create \(count) unique recipes using only these ingredients: \(ingredients.filter { !$0.isEmpty }.joined(separator: ", ")).
             Assume I have basic cooking ingredients like salt, pepper, flour and oil.
             Give me a brief description of the recipe.
@@ -22,7 +22,11 @@ class OpenAIService {
             Ingredients are formatted by measurement and name.
             Instructions are formatted by instructionNumber and instruction.
             provide detailed instructions.
-            for the step, dont provide step numbers.
+            For each step, do not provide step numbers.
+            Provide estimates for the duration of the recipe following the format "X hr Y min".
+            Provide estimates for the calories per serving as a number.
+            Provide estimates for the estimated cost per serving as a number.
+            Provide the difficulty of the recipe as a string: "easy", "medium", "hard" or "expert".
             include a detailed description.
             Return the result as a JSON array like this:
             [
@@ -30,86 +34,163 @@ class OpenAIService {
                     "title": "Recipe Name",
                     "description": "detailed description",
                     "ingredients": ["ingredient1", "ingredient2"],
-                    "steps": ["Step 1", "Step 2"]
+                    "steps": ["Step 1", "Step 2"],
+                    "duration": "1 hr 30 min",
+                    "calories_per_serving": 200,
+                    "estimated_cost_per_serving": 10.00,
+                    "difficulty": "easy"
                 },
                 ...
             ]
             """
 
-            let url = URL(string: "https://api.openai.com/v1/chat/completions")!
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let url = URL(string: "https://api.openai.com/v1/chat/completions")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            let body: [String: Any] = [
-                "model": "gpt-3.5-turbo",
-                "messages": [
-                    ["role": "user", "content": prompt]
-                ]
-            ]
+        let body: [String: Any] = [
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                ["role": "user", "content": prompt]
+            ],
+        ]
 
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-            let (data, _) = try await URLSession.shared.data(for: request)
-            let response = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
-
-            guard let content = response.choices.first?.message.content else {
-                throw NSError(domain: "OpenAIService", code: 1, userInfo: [NSLocalizedDescriptionKey: "No response from API"])
+        let data: Data
+        do {
+            let (responseData, _) = try await URLSession.shared.data(for: request)
+            if let json = try? JSONSerialization.jsonObject(with: responseData, options: [])
+                as? [String: Any],
+                json["error"] != nil
+            {
+                throw NSError(
+                    domain: "OpenAIService", code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "API key error"])
             }
-
-            // Parse the JSON array from the content
-            let jsonData = content.data(using: .utf8)!
-            let recipeResponses = try JSONDecoder().decode([OpenAIRecipeResponse].self, from: jsonData)
-
-            // Convert to Recipe objects
-        
-//            print ("Ingredients", ingredients)
-//            print ("Recipes", recipeResponses)
-            return recipeResponses.map { response in
-                Recipe(
-                    title: response.title,
-                    description: response.description,
-                    ingredients: response.ingredients,
-                    steps: response.steps
-                )
-            }
+            data = responseData
+            saveToFile(data: data, fileName: "generateRecipesResponse.json")
+        } catch {
+            print("Failed to fetch recipes, loading from mock. Error: \(error)")
+            data = loadFromMock(fileName: "generateRecipesResponse.json")
         }
-    
+
+        print("Got data: \(String(data: data, encoding: .utf8))")
+        let response = try JSONDecoder().decode(ChatCompletionResponse.self, from: data)
+        print(response)
+
+        guard let content = response.choices.first?.message.content else {
+            throw NSError(
+                domain: "OpenAIService", code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "No response from API"])
+        }
+
+        // Parse the JSON array from the content
+        let jsonData = content.data(using: .utf8)!
+        let recipeResponses = try JSONDecoder().decode([OpenAIRecipeResponse].self, from: jsonData)
+
+        // Convert to Recipe objects
+        print("Ingredients", ingredients)
+        print("Recipes", recipeResponses)
+        return recipeResponses.map { response in
+            Recipe(
+                title: response.title,
+                description: response.description,
+                ingredients: response.ingredients,
+                steps: response.steps,
+                duration: response.duration,
+                caloriesPerServing: response.caloriesPerServing,
+                estimatedCostPerServing: response.estimatedCostPerServing,
+                difficulty: response.difficulty
+            )
+        }
+    }
+
     func generateImage(for recipeName: String) async throws -> String {
-            let prompt = "A delicious, appetizing photo of \(recipeName), professional food photography"
+        let prompt = "A delicious, appetizing photo of \(recipeName), professional food photography"
 
-            let url = URL(string: "https://api.openai.com/v1/images/generations")!
-            var request = URLRequest(url: url)
-            request.httpMethod = "POST"
-            request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-            request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let url = URL(string: "https://api.openai.com/v1/images/generations")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
-            let body: [String: Any] = [
-                "model": "dall-e-3",
-                "prompt": prompt,
-                "size": "1024x1024",
-                "n": 1
-            ]
+        let body: [String: Any] = [
+            "model": "dall-e-3",
+            "prompt": prompt,
+            "size": "1024x1024",
+            "n": 1,
+        ]
 
-            request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-            let (data, _) = try await URLSession.shared.data(for: request)
-            let response = try JSONDecoder().decode(ImageGenerationResponse.self, from: data)
-
-            guard let imageURL = response.data.first?.url else {
-                throw NSError(domain: "OpenAIService", code: 2, userInfo: [NSLocalizedDescriptionKey: "No image URL in response"])
+        let data: Data
+        do {
+            let (responseData, _) = try await URLSession.shared.data(for: request)
+            if let json = try? JSONSerialization.jsonObject(with: responseData, options: [])
+                as? [String: Any],
+                json["error"] != nil
+            {
+                throw NSError(
+                    domain: "OpenAIService", code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "API key error"])
             }
-
-            return imageURL
+            data = responseData
+            saveToFile(data: data, fileName: recipeName + ".json")
+        } catch {
+            print("Failed to fetch image, loading from mock. Error: \(error)")
+            data = loadFromMock(fileName: recipeName + ".json")
         }
 
-        func downloadImage(from urlString: String) async throws -> Data {
-            guard let url = URL(string: urlString) else {
-                throw NSError(domain: "OpenAIService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
-            }
+        print("Got data: \(String(data: data, encoding: .utf8))")
+        let response = try JSONDecoder().decode(ImageGenerationResponse.self, from: data)
 
-            let (data, _) = try await URLSession.shared.data(from: url)
-            return data
+        guard let imageURL = response.data.first?.url else {
+            throw NSError(
+                domain: "OpenAIService", code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "No image URL in response"])
         }
+
+        return imageURL
+    }
+
+    func downloadImage(from urlString: String) async throws -> Data {
+        guard let url = URL(string: urlString) else {
+            throw NSError(
+                domain: "OpenAIService", code: 3,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])
+        }
+
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return data
+    }
+
+    private func loadFromMock(fileName: String) -> Data {
+        let resourceName = "\(fileName)".replacingOccurrences(of: ".json", with: "")
+        guard let file = Bundle.main.url(forResource: resourceName, withExtension: "json")
+        else {
+            fatalError("Couldn't find \(fileName) in main bundle.")
+        }
+
+        do {
+            return try Data(contentsOf: file)
+        } catch {
+            fatalError("Couldn't load \(fileName) from main bundle:\n\(error)")
+        }
+    }
+
+    private func saveToFile(data: Data, fileName: String) {
+        let documentsDirectory = FileManager.default.urls(
+            for: .documentDirectory, in: .userDomainMask
+        ).first!
+        let fileURL = documentsDirectory.appendingPathComponent(fileName)
+        do {
+            try data.write(to: fileURL)
+            print("Saved to \(fileURL.path)")
+        } catch {
+            print("Error saving file: \(error)")
+        }
+    }
 }
