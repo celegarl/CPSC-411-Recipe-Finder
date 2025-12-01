@@ -33,7 +33,7 @@ struct LandingPageView: View {
             // Action buttons
             VStack(spacing: 20) {
                 Button(action: {
-                    selectedTab = 0 // Navigate to Ingredients tab
+                    selectedTab = 0  // Navigate to Ingredients tab
                 }) {
                     Text("Enter Ingredients")
                         .font(.headline)
@@ -43,21 +43,7 @@ struct LandingPageView: View {
                         .background(Color.gray.opacity(0.2))
                         .cornerRadius(10)
                 }
-
-                Button(action: {
-                    selectedTab = 3 // Navigate to Learn More (will add this)
-                }) {
-                    Text("Learn More")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(10)
-                }
-            }
-            .padding(.horizontal, 40)
-
+            }.padding(.horizontal, 40)
             Spacer()
         }
     }

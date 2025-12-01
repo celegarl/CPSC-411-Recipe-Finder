@@ -5,65 +5,72 @@
 //  Created by Guido Asbun on 11/13/25.
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 @MainActor
 class RecipeViewModel: ObservableObject {
 
     // MARK: - Hard Coded ingredients for testing
-    
-    @Published var ingredients: [String] = ["chicken","orange","rice"]
+
+    @Published var ingredients: [String] = ["chicken", "orange", "rice"]
     @Published var recipes: [Recipe] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
-    @Published var recipeCount = Config.defaultRecipeCount
-    
+
     private let openAIService = OpenAIService.shared
-    
-    func addIngredient() {
-        // Add ingredient
+
+    func addIngredient(_ ingredient: String) {
+        guard !ingredient.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        ingredients.append(ingredient)
     }
-    
-    func removeIngredient(at index: Int) {
-        // Remove ingredient
+
+    func removeIngredient(at offsets: IndexSet) {
+        ingredients.remove(atOffsets: offsets)
     }
-    
+
     func canGenerateRecipes() -> Bool {
         // Determines if "Generate Recipes" button should be enabled
         return true
     }
-    
+
     func generateRecipes() async {
+        print("GENERATING RECIPES...")
         // Generates recipes
-        let validIngredients = ingredients.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        let validIngredients = ingredients.filter {
+            !$0.trimmingCharacters(in: .whitespaces).isEmpty
+        }
 
         guard validIngredients.count >= 1 else {
             errorMessage = "Please enter at least one ingredient"
             return
         }
-        
+
         isLoading = true
         errorMessage = nil
-        
+
         do {
             // Generate recipes
             var generatedRecipes = try await openAIService.generateRecipes(
                 ingredients: validIngredients,
-                count: recipeCount
+                count: validIngredients.count
             )
-            
+
             // Generate images for all recipes in parallel
             await withTaskGroup(of: (Int, String?, Data?).self) { group in
                 for i in 0..<generatedRecipes.count {
                     group.addTask {
                         do {
-                            let imageURL = try await self.openAIService.generateImage(for: generatedRecipes[i].title)
-                            let imageData = try await self.openAIService.downloadImage(from: imageURL)
+                            let imageURL = try await self.openAIService.generateImage(
+                                for: generatedRecipes[i].title)
+                            let imageData = try await self.openAIService.downloadImage(
+                                from: imageURL)
                             return (i, imageURL, imageData)
                         } catch {
-                            print("Failed to generate image for \(generatedRecipes[i].title): \(error)")
+                            print(
+                                "Failed to generate image for \(generatedRecipes[i].title): \(error)"
+                            )
                             return (i, nil, nil)
                         }
                     }
@@ -77,30 +84,30 @@ class RecipeViewModel: ObservableObject {
                     }
                 }
             }
-            
+
             recipes = generatedRecipes
             isLoading = false
-            
+
             // MARK: - Print the recipes to the console
             print("AI - GENERATED RECIPES: ")
             for recipe in generatedRecipes {
                 print("\(recipe)\n")
             }
-            
+
         } catch {
             isLoading = false
             errorMessage = "Unable to create recipes, please try again"
             print("Error generating recipes: \(error)")
         }
-        
+
     }
-    
+
     func clearRecipes() {
         recipes = []
     }
-    
+
     func resetIngredients() {
-        ingredients = ["","",""]
+        ingredients = ["", "", ""]
     }
-    
+
 }

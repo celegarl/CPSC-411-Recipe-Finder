@@ -8,34 +8,95 @@ import SwiftUI
 
 struct RecipesDisplayView: View {
     @ObservedObject var viewModel: RecipeViewModel
-    
+    @Binding var selectedTab: Int
+
     var body: some View {
-        ScrollView {
-            Text("Recipes Display")
-                .font(.largeTitle)
-                .padding()
-            
-            // MARK: - This should be on the AddIngredientsView
-            // Generate Recipes button
-            Button(action: {
-                Task {
-                    await viewModel.generateRecipes()
-                }
-            }) {
-                Text("Generate Recipes")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+        ZStack {
+            ScrollView {
+                Text("Recipes Display")
+                    .font(.largeTitle)
                     .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(10)
+
+                // MARK: - This should be on the AddIngredientsView
+                // Generate Recipes button
+
+                // Display generated recipes
+                ForEach(viewModel.recipes) { recipe in
+                    recipePreview(recipe: recipe)
+                }
             }
-            .disabled(!viewModel.canGenerateRecipes() || viewModel.isLoading)
-            .opacity(viewModel.canGenerateRecipes() && !viewModel.isLoading ? 1.0 : 0.5)
+
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
+                    .scaleEffect(2)
+            }
+
+            if viewModel.recipes.isEmpty {
+                VStack {
+                    Spacer()
+                    Text("No recipes generated")
+                    Spacer()
+                    Button(action: {
+                        selectedTab = 0
+                    }) {
+                        Text("Generate Recipes")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(10)
+                    }
+                    Spacer()
+                }
+            }
+
         }
-        
+    }
+
+    @ViewBuilder
+    private func recipePreview(recipe: Recipe) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if let imageData = recipe.imageData, let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 200)
+                    .clipped()
+            } else if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 200)
+                        .clipped()
+                } placeholder: {
+                    ZStack {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(height: 200)
+                        ProgressView()
+                    }
+                }
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(height: 200)
+            }
+
+            Text(recipe.title)
+                .font(.headline)
+
+            Text(recipe.description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color(UIColor.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }
 
 #Preview {
-    RecipesDisplayView(viewModel: RecipeViewModel())
+    MainTabView(selectedTab: 1)
 }

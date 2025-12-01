@@ -1,0 +1,36 @@
+{
+  "id": "chatcmpl-ChMgu02L6NmnUbwEfZL0oOU6KYkYT",
+  "object": "chat.completion",
+  "created": 1764451364,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "[\n    {\n        \"title\": \"Orange Chicken Stir Fry\",\n        \"description\": \"A flavorful and tangy stir fry dish with juicy chicken, fresh orange slices, and fluffy rice.\",\n        \"ingredients\": [\"1 lb chicken breast, cut into bite-sized pieces\", \"2 oranges, sliced\", \"2 cups cooked rice\", \"2 tbsp oil\", \"Salt\", \"Pepper\", \"2 tbsp flour\"],\n        \"steps\": [\"Dredge chicken pieces in flour seasoned with salt and pepper.\", \"Heat oil in a pan and cook chicken until browned.\", \"Add orange slices and cook until fragrant.\", \"Serve over cooked rice.\"],\n        \"duration\": \"30 min\",\n        \"calories_per_serving\": 350,\n        \"estimated_cost_per_serving\": 8.00,\n        \"difficulty\": \"easy\"\n    },\n    {\n        \"title\": \"Orange Glazed Chicken\",\n        \"description\": \"A sweet and savory dish featuring tender chicken coated in a sticky orange glaze, served with fluffy rice.\",\n        \"ingredients\": [\"1 lb chicken thighs\", \"1 orange, juiced\", \"1/4 cup soy sauce\", \"1/4 cup honey\", \"2 cups cooked rice\", \"2 tbsp oil\", \"Salt\", \"Pepper\"],\n        \"steps\": [\"Season chicken thighs with salt and pepper.\", \"In a bowl, mix orange juice, soy sauce, and honey to make the glaze.\", \"Pan-fry chicken until cooked through.\", \"Brush chicken with orange glaze and serve over rice.\"],\n        \"duration\": \"45 min\",\n        \"calories_per_serving\": 400,\n        \"estimated_cost_per_serving\": 9.00,\n        \"difficulty\": \"medium\"\n    },\n    {\n        \"title\": \"Orange Chicken and Rice Soup\",\n        \"description\": \"A comforting and nourishing soup with tender chicken, fragrant orange zest, and fluffy rice in a flavorful broth.\",\n        \"ingredients\": [\"1 lb chicken thighs, boneless and skinless\", \"1 orange, zested\", \"1 cup cooked rice\", \"6 cups chicken broth\", \"2 tbsp oil\", \"Salt\", \"Pepper\"],\n        \"steps\": [\"Heat oil in a pot and cook chicken thighs until browned.\", \"Add chicken broth and orange zest, simmer for 20 minutes.\", \"Shred chicken and return to the pot with cooked rice.\", \"Season with salt and pepper to taste before serving.\"],\n        \"duration\": \"1 hr\",\n        \"calories_per_serving\": 300,\n        \"estimated_cost_per_serving\": 7.00,\n        \"difficulty\": \"medium\"\n    }\n]",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 260,
+    "completion_tokens": 543,
+    "total_tokens": 803,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+}

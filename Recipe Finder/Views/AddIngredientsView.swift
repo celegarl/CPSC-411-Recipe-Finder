@@ -1,11 +1,10 @@
 import SwiftUI
 
 struct AddIngredientsView: View {
-    @StateObject private var viewModel = AddIngredientsViewModel()
+    @ObservedObject var viewModel: RecipeViewModel
+    @Binding var selectedTab: Int
     @State private var newIngredient: String = ""
 
-    @Binding var selectedTab: Int
-    
     var body: some View {
         NavigationView {
             VStack {
@@ -30,15 +29,25 @@ struct AddIngredientsView: View {
                 }
 
                 NavigationLink(
-                    destination: RecipeListView(
-                        ingredients: viewModel.ingredients.joined(separator: ","))
+                    destination: RecipesDisplayView(viewModel: viewModel, selectedTab: $selectedTab)
                 ) {
-                    Text("Find Recipes")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+                    Button(action: {
+                        selectedTab = 1
+                        Task {
+                            await viewModel.generateRecipes()
+                        }
+                    }) {
+                        Text("Generate Recipes")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                            .padding()
+                            .background(Color.gray.opacity(0.2))
+                            .cornerRadius(10)
+                    }
+                    .disabled(!viewModel.canGenerateRecipes() || viewModel.isLoading)
+                    .opacity(viewModel.canGenerateRecipes() && !viewModel.isLoading ? 1.0 : 0.5)
                 }
+                Spacer()
             }
             .navigationTitle("Recipe Finder")
         }
@@ -46,5 +55,5 @@ struct AddIngredientsView: View {
 }
 
 #Preview {
-    AddIngredientsView(selectedTab: .constant(0))
+    MainTabView(selectedTab: 0)
 }
