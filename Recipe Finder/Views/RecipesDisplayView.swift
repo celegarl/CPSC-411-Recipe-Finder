@@ -11,46 +11,47 @@ struct RecipesDisplayView: View {
     @Binding var selectedTab: Int
 
     var body: some View {
-        ZStack {
-            ScrollView {
-                Text("Recipes Display")
-                    .font(.largeTitle)
-                    .padding()
+        NavigationStack {
+            ZStack {
+                ScrollView {
+                    Text("Recipes Display")
+                        .font(.largeTitle)
+                        .padding()
 
-                // MARK: - This should be on the AddIngredientsView
-                // Generate Recipes button
-
-                // Display generated recipes
-                ForEach(viewModel.recipes) { recipe in
-                    recipePreview(recipe: recipe)
-                }
-            }
-
-            if viewModel.isLoading {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle())
-                    .scaleEffect(2)
-            }
-
-            if viewModel.recipes.isEmpty {
-                VStack {
-                    Spacer()
-                    Text("No recipes generated")
-                    Spacer()
-                    Button(action: {
-                        selectedTab = 0
-                    }) {
-                        Text("Generate Recipes")
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                            .padding()
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(10)
+                    ForEach(viewModel.recipes) { recipe in
+                        NavigationLink {
+                            RecipeDetailView(recipe: recipe)
+                        } label: {
+                            recipePreview(recipe: recipe)
+                        }
                     }
-                    Spacer()
+                }
+
+                if viewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .scaleEffect(2)
+                }
+
+                if viewModel.recipes.isEmpty {
+                    VStack {
+                        Spacer()
+                        Text("No recipes generated")
+                        Spacer()
+                        Button(action: {
+                            selectedTab = 0
+                        }) {
+                            Text("Generate Recipes")
+                                .font(.headline)
+                                .foregroundStyle(.primary)
+                                .padding()
+                                .background(Color.gray.opacity(0.2))
+                                .cornerRadius(10)
+                        }
+                        Spacer()
+                    }
                 }
             }
-
         }
     }
 

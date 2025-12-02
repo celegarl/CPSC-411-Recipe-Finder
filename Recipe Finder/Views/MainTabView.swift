@@ -15,7 +15,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
 
-            // Add ingredients input tab (button to enter ingredients)
+            // Ingredients tab
             AddIngredientsView(viewModel: recipeViewModel, selectedTab: $selectedTab)
                 .tabItem {
                     Image(systemName: "fork.knife")
@@ -23,7 +23,7 @@ struct MainTabView: View {
                 }
                 .tag(0)
 
-            // Recipe List view
+            // Recipes tab
             RecipesDisplayView(viewModel: recipeViewModel, selectedTab: $selectedTab)
                 .tabItem {
                     Image(systemName: "list.bullet")
@@ -31,7 +31,7 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
-            // Landing Page / Home Tab
+            // Home tab
             LandingPageView(selectedTab: $selectedTab)
                 .tabItem {
                     Image(systemName: "house.fill")
@@ -39,17 +39,19 @@ struct MainTabView: View {
                 }
                 .tag(2)
 
-            // Favorites Tab
-            FavoritesView(viewModel: favoritesViewModel)
+            // Favorites tab
+            FavoritesView()   // ❗ REMOVE viewModel: favoritesViewModel
                 .tabItem {
                     Image(systemName: "star.fill")
                     Text("Favorites")
                 }
                 .tag(3)
         }
+        .environmentObject(favoritesViewModel)
     }
 }
 
 #Preview {
     MainTabView()
+        .environmentObject(FavoritesViewModel()) // Preview fix
 }
