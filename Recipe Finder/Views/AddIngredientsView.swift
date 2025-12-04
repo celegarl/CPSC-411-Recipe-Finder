@@ -26,6 +26,15 @@ struct AddIngredientsView: View {
                         Text(ingredient)
                     }
                     .onDelete(perform: viewModel.removeIngredient)
+
+                    if !viewModel.ingredients.isEmpty {
+                        Button(action: {
+                            viewModel.resetIngredients()
+                        }) {
+                            Text("Delete All")
+                                .foregroundColor(.red)
+                        }
+                    }
                 }
 
                 NavigationLink(
@@ -49,7 +58,7 @@ struct AddIngredientsView: View {
                 }
                 Spacer()
             }
-            .navigationTitle("Recipe Finder")
+            .navigationTitle("Enter Ingredients")
         }
     }
 }

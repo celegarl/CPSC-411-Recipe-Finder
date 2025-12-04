@@ -14,10 +14,6 @@ struct RecipesDisplayView: View {
         NavigationStack {
             ZStack {
                 ScrollView {
-                    Text("Recipes Display")
-                        .font(.largeTitle)
-                        .padding()
-
                     ForEach(viewModel.recipes) { recipe in
                         NavigationLink {
                             RecipeDetailView(recipe: recipe)
@@ -52,6 +48,7 @@ struct RecipesDisplayView: View {
                     }
                 }
             }
+            .navigationTitle("Recipes")
         }
     }
 

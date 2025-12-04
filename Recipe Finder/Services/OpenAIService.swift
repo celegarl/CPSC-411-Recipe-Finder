@@ -13,7 +13,7 @@ class OpenAIService {
 
     private init() {}
 
-    func generateRecipes(ingredients: [String], count: Int = 3) async throws -> [Recipe] {
+    func generateRecipes(ingredients: [String], count: Int) async throws -> [Recipe] {
         let prompt = """
             Create \(count) unique recipes using only these ingredients: \(ingredients.filter { !$0.isEmpty }.joined(separator: ", ")).
             Assume I have basic cooking ingredients like salt, pepper, flour and oil.
