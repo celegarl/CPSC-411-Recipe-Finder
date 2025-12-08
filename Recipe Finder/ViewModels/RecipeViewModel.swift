@@ -14,12 +14,13 @@ class RecipeViewModel: ObservableObject {
 
     // MARK: - Hard Coded ingredients for testing
 
-    @Published var ingredients: [String] = ["chicken", "orange", "rice"]
+    @Published var ingredients: [String] = []
     @Published var recipes: [Recipe] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
 
     private let openAIService = OpenAIService.shared
+    private let recipeCount = Config.defaultRecipeCount
 
     func addIngredient(_ ingredient: String) {
         guard !ingredient.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
@@ -54,7 +55,7 @@ class RecipeViewModel: ObservableObject {
             // Generate recipes
             var generatedRecipes = try await openAIService.generateRecipes(
                 ingredients: validIngredients,
-                count: validIngredients.count
+                count: recipeCount
             )
 
             // Generate images for all recipes in parallel
@@ -107,7 +108,7 @@ class RecipeViewModel: ObservableObject {
     }
 
     func resetIngredients() {
-        ingredients = ["", "", ""]
+        ingredients = []
     }
 
 }
