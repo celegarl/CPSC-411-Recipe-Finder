@@ -73,6 +73,10 @@ struct Config {
 
 ---
 
+## Appllication Video Walkthrough
+
+## https://youtu.be/doK4vHW8iuc
+
 ## Application Images
 
 |                                      Home                                       |                                          Ingredients                                          |                                        Recipes                                        |                                   Recipe Details                                    |                                         Favorites                                         |
