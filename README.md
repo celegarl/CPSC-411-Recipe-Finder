@@ -75,8 +75,8 @@ struct Config {
 
 ## Application Images
 
-|                     Home                     |                     Ingredients                     |                     Recipes                     |                 Recipe Details                 |                     Favorites                     |
-| :------------------------------------------: | :-------------------------------------------------: | :---------------------------------------------: | :--------------------------------------------: | :-----------------------------------------------: |
-| <a href="Screenshots/home.png"><img src="Screenshots/home.png" width="220"></a> | <a href="Screenshots/ingredients.png"><img src="Screenshots/ingredients.png" width="180"></a> | <a href="Screenshots/recipes.png"><img src="Screenshots/recipes.png" width="200"></a> | <a href="Screenshots/recipe.png"><img src="Screenshots/recipe.png" width="200"></a> | <a href="Screenshots/favorites.png"><img src="Screenshots/favorites.png" width="200"></a> |
+|                                      Home                                       |                                          Ingredients                                          |                                        Recipes                                        |                                   Recipe Details                                    |                                         Favorites                                         |
+| :-----------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------: |
+| <a href="Screenshots/home.png"><img src="Screenshots/home.png" width="200"></a> | <a href="Screenshots/ingredients.png"><img src="Screenshots/ingredients.png" width="200"></a> | <a href="Screenshots/recipes.png"><img src="Screenshots/recipes.png" width="200"></a> | <a href="Screenshots/recipe.png"><img src="Screenshots/recipe.png" width="200"></a> | <a href="Screenshots/favorites.png"><img src="Screenshots/favorites.png" width="200"></a> |
 
 ---
