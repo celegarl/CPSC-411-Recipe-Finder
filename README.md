@@ -13,7 +13,7 @@ Recipe Finder is an iOS app built with **SwiftUI** that generates recipes based 
 | Guido Asbun     | [@guidoasbun](https://github.com/guidoasbun) |
 | Ryan Hellewege  | [@rhellwege](https://github.com/rhellwege)   |
 | Celeste Garlejo | [@celegarl](https://github.com/celegarl)     |
-
+| Isaiah Padilla  | [@Isaiah714](https://github.com/Isaiah714)   |
 ---
 
 ## Features
